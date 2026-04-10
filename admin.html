@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Circuit CTS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #080b12;
+    --surface: #10151f;
+    --surface2: #171e2d;
+    --border: #1f2d44;
+    --accent: #3b82f6;
+    --accent2: #f0c040;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warning: #f97316;
+    --muted: #3d5070;
+    --text: #dce6f5;
+    --text2: #6a84a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh; padding: 2rem;
+  }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 3rem 2.5rem; width: 100%; max-width: 400px;
+  }
+  .login-card h1 {
+    font-family: 'Syne', sans-serif; font-size: 1.75rem; font-weight: 800;
+    color: var(--accent); margin-bottom: 0.25rem;
+  }
+  .subtitle { color: var(--text2); font-size: 0.875rem; margin-bottom: 2rem; }
+
+  label {
+    display: block; font-size: 0.72rem; font-weight: 600; color: var(--text2);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+  input[type="email"], input[type="password"] {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 1rem; padding: 0.75rem 1rem; outline: none;
+    transition: border-color 0.2s; margin-bottom: 1.25rem;
+  }
+  input:focus { border-color: var(--accent); }
+
+  .btn {
+    width: 100%; padding: 0.875rem; border: none; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+  .btn-sm {
+    width: auto; padding: 0.3rem 0.65rem; font-size: 0.7rem;
+    border-radius: 5px; font-family: 'DM Sans', sans-serif; cursor: pointer;
+    border: none; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-validate { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+  .btn-validate:hover { background: rgba(34,197,94,0.25); }
+  .btn-refuse { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+  .btn-refuse:hover { background: rgba(239,68,68,0.25); }
+  .btn-delete { background: rgba(100,116,139,0.15); color: var(--text2); border: 1px solid rgba(100,116,139,0.2); }
+  .btn-delete:hover { background: rgba(239,68,68,0.15); color: var(--danger); border-color: rgba(239,68,68,0.3); }
+  .btn-block { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px dashed rgba(239,68,68,0.4); }
+  .btn-block:hover { background: rgba(239,68,68,0.2); }
+  .btn-unblock { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+  .btn-unblock:hover { background: rgba(34,197,94,0.2); }
+
+  /* APP */
+  #app { display: none; }
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 0.75rem; }
+  header h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+  .admin-chip {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 0.2rem 0.6rem;
+    background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent); border-radius: 20px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .btn-logout {
+    background: transparent; border: 1px solid var(--border); color: var(--text2);
+    padding: 0.375rem 0.75rem; border-radius: 6px; cursor: pointer;
+    font-size: 0.75rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: rgba(59,130,246,0.04); border-bottom: 1px solid rgba(59,130,246,0.1);
+    padding: 0.75rem 2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .toolbar span { font-size: 0.8rem; color: var(--text2); }
+  .toggle-block {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.9rem;
+    border-radius: 6px; cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface2); font-size: 0.8rem; font-family: 'DM Sans', sans-serif;
+    color: var(--text2); transition: all 0.2s;
+  }
+  .toggle-block.active { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: var(--danger); }
+  .toggle-block .indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .toggle-block.active .indicator { background: var(--danger); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex; gap: 1.5rem; padding: 0.75rem 2rem;
+    border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .stat { font-size: 0.8rem; color: var(--text2); display: flex; align-items: center; gap: 0.4rem; }
+  .stat strong { color: var(--text); font-family: 'DM Mono', monospace; }
+
+  /* GRID */
+  .container { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+  .day-section { margin-bottom: 2.5rem; }
+  .day-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .day-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .day-limit {
+    font-size: 0.7rem; color: var(--accent2); background: rgba(240,192,64,0.1);
+    border: 1px solid rgba(240,192,64,0.2); border-radius: 4px;
+    padding: 0.2rem 0.5rem; font-family: 'DM Mono', monospace;
+  }
+  .slots-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .slot {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; width: 130px; min-height: 100px;
+    padding: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;
+    transition: all 0.2s;
+  }
+  .slot:hover { border-color: rgba(59,130,246,0.3); }
+  .slot.full { border-color: rgba(239,68,68,0.25); }
+  .slot.blocked {
+    border-color: rgba(239,68,68,0.35);
+    background: repeating-linear-gradient(135deg,rgba(239,68,68,0.05),rgba(239,68,68,0.05) 4px,transparent 4px,transparent 8px);
+  }
+  .slot.block-mode-on:hover { border-color: var(--danger); cursor: pointer; }
+
+  .slot-time { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text2); font-weight: 500; }
+  .slot-count { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+  .slot-entries { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+
+  .entry {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 3px 6px; border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+  }
+  .entry-pending { background: rgba(249,115,22,0.1); color: var(--warning); border: 1px solid rgba(249,115,22,0.2); }
+  .entry-validated { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
+  .entry-refused { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); text-decoration: line-through; }
+
+  .entry-actions { display: flex; gap: 2px; }
+
+  .slot-blocked-label {
+    display: flex; align-items: center; justify-content: space-between; flex: 1;
+    color: var(--danger); font-size: 0.65rem; font-family: 'DM Mono', monospace; opacity: 0.8;
+  }
+
+  .slot-block-btn {
+    width: 100%; padding: 0.2rem; background: transparent;
+    border: 1px dashed rgba(239,68,68,0.2); color: rgba(239,68,68,0.4);
+    border-radius: 4px; cursor: pointer; font-size: 0.6rem;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s; margin-top: auto;
+  }
+  .slot-block-btn:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.05); }
+
+  .separator { height: 1px; background: var(--border); margin: 0.5rem 0 1.5rem; }
+
+  /* STATUS */
+  #status-msg {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1.25rem;
+    font-size: 0.875rem; display: none; z-index: 999; max-width: 300px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  #status-msg.show { display: block; animation: slidein 0.2s ease; }
+  #status-msg.ok { border-color: var(--success); color: var(--success); }
+  #status-msg.err { border-color: var(--danger); color: var(--danger); }
+  #status-msg.info { border-color: var(--accent); color: var(--accent); }
+  @keyframes slidein { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>&#9670; Espace Prof</h1>
+    <p class="subtitle">Circuit CTS - Gestion des réservations</p>
+    <label>Email</label>
+    <input type="email" id="email-input" placeholder="prof@heh.be" onkeydown="if(event.key==='Enter')login()">
+    <label>Mot de passe</label>
+    <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn btn-primary" onclick="login()">Connexion</button>
+    <p style="margin-top:1rem;font-size:0.75rem;color:var(--text2);text-align:center">
+      Compte créé via Firebase Authentication
+    </p>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-left">
+      <h1>&#9670; Circuit CTS</h1>
+      <span class="admin-chip">Professeur</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--text2)">
+        <div class="dot"></div> Sync live
+      </div>
+      <span id="user-email" style="font-size:0.75rem;color:var(--text2);font-family:'DM Mono',monospace"></span>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <span>Outils :</span>
+    <button class="toggle-block" id="block-toggle" onclick="toggleBlockMode()">
+      <span class="indicator"></span>
+      Mode blocage
+    </button>
+    <span id="block-hint" style="font-size:0.75rem;color:var(--danger);display:none">
+      Cliquez sur "Bloquer" dans un créneau pour le rendre indisponible
+    </span>
+  </div>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <div class="container" id="grid-container"></div>
+</div>
+
+<div id="status-msg"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, onValue, push, remove, update }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+// ==== REMPLACE CES VALEURS PAR TA CONFIG FIREBASE ====
+const firebaseConfig = {
+  apiKey: "AIzaSyDoyOMkdmcXdMY65fUwgBCcuTmMHhXb1_0",
+  authDomain: "gdpcts.firebaseapp.com",
+  databaseURL: "https://gdpcts-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "gdpcts",
+  storageBucket: "gdpcts.firebasestorage.app",
+  messagingSenderId: "599990973235",
+  appId: "1:599990973235:web:16467be830daa86c958446"
+};
+// =====================================================
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+
+// Plages horaires
+const ALL_SLOTS = [];
+for (let h = 8; h < 17; h++)
+  for (let m = 0; m < 60; m += 20)
+    ALL_SLOTS.push(`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`);
+
+const DAYS = [
+  { id: 'vendredi', label: 'Vendredi', slots: ALL_SLOTS, limit: null },
+  { id: 'samedi',   label: 'Samedi',   slots: ALL_SLOTS, limit: null },
+  { id: 'lundi',    label: 'Lundi',    slots: ALL_SLOTS.filter(s => parseInt(s) < 10), limit: '08h00 - 10h00' }
+];
+
+let reservations = {};
+let blockMode = false;
+let unsubscribe = null;
+
+// AUTH
+window.login = async () => {
+  const email = document.getElementById('email-input').value.trim();
+  const pwd = document.getElementById('pwd-input').value;
+  if (!email || !pwd) { showMsg('Remplissez tous les champs', 'err'); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+  } catch(e) {
+    showMsg('Identifiants incorrects', 'err');
+  }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-email').textContent = user.email;
+    unsubscribe = onValue(ref(db, 'reservations'), snap => {
+      reservations = snap.val() || {};
+      renderGrid();
+      renderStats();
+    });
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    if (unsubscribe) unsubscribe();
+  }
+});
+
+// BLOCK MODE
+window.toggleBlockMode = () => {
+  blockMode = !blockMode;
+  const btn = document.getElementById('block-toggle');
+  btn.classList.toggle('active', blockMode);
+  document.getElementById('block-hint').style.display = blockMode ? 'inline' : 'none';
+  renderGrid();
+};
+
+// STATS
+function renderStats() {
+  let total = 0, pending = 0, validated = 0, refused = 0, blocked = 0;
+  Object.values(reservations).forEach(slot => {
+    Object.values(slot).forEach(v => {
+      if (v.type === 'blocked') { blocked++; return; }
+      total++;
+      if (v.status === 'pending') pending++;
+      else if (v.status === 'validated') validated++;
+      else if (v.status === 'refused') refused++;
+    });
+  });
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat">Reservations : <strong>${total}</strong></div>
+    <div class="stat" style="color:var(--warning)">En attente : <strong style="color:var(--warning)">${pending}</strong></div>
+    <div class="stat" style="color:var(--success)">Validees : <strong style="color:var(--success)">${validated}</strong></div>
+    <div class="stat" style="color:var(--danger)">Refusees : <strong style="color:var(--danger)">${refused}</strong></div>
+    <div class="stat">Creneaux bloques : <strong>${blocked}</strong></div>
+  `;
+}
+
+// GRID
+function renderGrid() {
+  const container = document.getElementById('grid-container');
+  container.innerHTML = '';
+  DAYS.forEach(day => {
+    const section = document.createElement('div');
+    section.className = 'day-section';
+    section.innerHTML = `<div class="day-header">
+      <div class="day-title">${day.label}</div>
+      ${day.limit ? `<span class="day-limit">${day.limit}</span>` : ''}
+    </div>`;
+    const grid = document.createElement('div');
+    grid.className = 'slots-grid';
+
+    day.slots.forEach(slotTime => {
+      const slotId = `${day.id}_${slotTime.replace('h','')}`;
+      const slotData = reservations[slotId] || {};
+      const entries = Object.entries(slotData);
+      const blockedEntry = entries.find(([,v]) => v.type === 'blocked');
+      const groups = entries.filter(([,v]) => v.type !== 'blocked');
+
+      const slot = document.createElement('div');
+      slot.className = 'slot' +
+        (blockedEntry ? ' blocked' : groups.length >= 3 ? ' full' : '') +
+        (blockMode ? ' block-mode-on' : '');
+
+      let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="slot-time">${slotTime}</div>
+          ${!blockedEntry ? `<div class="slot-count">${groups.length}/3</div>` : ''}
+        </div>
+        <div class="slot-entries">`;
+
+      if (blockedEntry) {
+        html += `<div class="slot-blocked-label">
+          <span>&#9888; Indisponible</span>
+          <button class="btn-sm btn-unblock" onclick="deleteEntry('${slotId}','${blockedEntry[0]}')">Debloquer</button>
+        </div>`;
+      } else {
+        groups.forEach(([key, val]) => {
+          const cls = val.status === 'validated' ? 'entry-validated'
+            : val.status === 'refused' ? 'entry-refused' : 'entry-pending';
+          const icon = val.status === 'validated' ? ' ✓' : val.status === 'refused' ? ' ✗' : ' ?';
+          html += `<div class="entry ${cls}">
+            <span>Gr. ${val.group}${icon}</span>
+            <div class="entry-actions">
+              <button class="btn-sm btn-validate" onclick="setStatus('${slotId}','${key}','validated')">✓</button>
+              <button class="btn-sm btn-refuse" onclick="setStatus('${slotId}','${key}','refused')">✗</button>
+              <button class="btn-sm btn-delete" onclick="deleteEntry('${slotId}','${key}')">&#128465;</button>
+            </div>
+          </div>`;
+        });
+
+        if (blockMode) {
+          html += `<button class="slot-block-btn" onclick="blockSlot('${slotId}')">&#9888; Bloquer ce creneau</button>`;
+        }
+      }
+
+      html += `</div>`;
+      slot.innerHTML = html;
+      grid.appendChild(slot);
+    });
+
+    section.appendChild(grid);
+    const sep = document.createElement('div');
+    sep.className = 'separator';
+    section.appendChild(sep);
+    container.appendChild(section);
+  });
+}
+
+// ACTIONS FIREBASE
+window.setStatus = (slotId, key, status) => {
+  update(ref(db, `reservations/${slotId}/${key}`), { status })
+    .then(() => showMsg(status === 'validated' ? 'Validé !' : 'Refusé', 'ok'));
+};
+
+window.deleteEntry = (slotId, key) => {
+  remove(ref(db, `reservations/${slotId}/${key}`))
+    .then(() => showMsg('Supprimé', 'ok'));
+};
+
+window.blockSlot = slotId => {
+  const slotData = reservations[slotId] || {};
+  if (Object.values(slotData).some(v => v.type === 'blocked')) {
+    showMsg('Déjà bloqué', 'err'); return;
+  }
+  push(ref(db, `reservations/${slotId}`), { type: 'blocked', ts: Date.now() })
+    .then(() => showMsg('Créneau bloqué', 'ok'));
+};
+
+let msgTimer;
+function showMsg(txt, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = txt;
+  el.className = `show ${type}`;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+</script>
+</body>
+</html>

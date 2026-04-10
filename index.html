@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réservation Circuit CTS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161b24;
+    --surface2: #1e2535;
+    --border: #2a3347;
+    --accent: #f0c040;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --muted: #556070;
+    --text: #e8edf5;
+    --text2: #8a97ab;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh; padding: 2rem;
+  }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 3rem 2.5rem; width: 100%; max-width: 400px;
+  }
+  .login-card h1 {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    color: var(--accent); margin-bottom: 0.25rem;
+  }
+  .subtitle { color: var(--text2); font-size: 0.875rem; margin-bottom: 2rem; }
+
+  .info-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
+    font-size: 0.8rem; color: var(--text2); line-height: 1.7;
+  }
+  .info-box strong { color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  label {
+    display: block; font-size: 0.72rem; font-weight: 600; color: var(--text2);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+  select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 1rem; padding: 0.75rem 1rem; outline: none;
+    transition: border-color 0.2s; margin-bottom: 1.25rem;
+  }
+  select:focus { border-color: var(--accent); }
+  select option { background: var(--surface); }
+
+  .btn-primary {
+    width: 100%; padding: 0.875rem; border: none; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; background: var(--accent); color: #0d0f14;
+    transition: all 0.2s; letter-spacing: 0.03em;
+  }
+  .btn-primary:hover { background: #ffd050; transform: translateY(-1px); }
+
+  /* HEADER */
+  #app { display: none; }
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500;
+    padding: 0.3rem 0.75rem; border-radius: 20px;
+    background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.3); color: var(--accent);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .btn-logout {
+    background: transparent; border: 1px solid var(--border); color: var(--text2);
+    padding: 0.375rem 0.75rem; border-radius: 6px; cursor: pointer;
+    font-size: 0.75rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* LEGEND */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 1rem; padding: 0.75rem 2rem;
+    border-bottom: 1px solid var(--border); background: var(--surface);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* GRID */
+  .container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+  .day-section { margin-bottom: 2.5rem; }
+  .day-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .day-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .day-limit {
+    font-size: 0.7rem; color: var(--accent); background: rgba(240,192,64,0.1);
+    border: 1px solid rgba(240,192,64,0.2); border-radius: 4px;
+    padding: 0.2rem 0.5rem; font-family: 'DM Mono', monospace;
+  }
+  .slots-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .slot {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; width: 118px; min-height: 90px;
+    padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;
+    transition: border-color 0.2s;
+  }
+  .slot.full { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03); }
+  .slot.has-mine { border-color: rgba(240,192,64,0.45); }
+  .slot.blocked {
+    border-color: rgba(239,68,68,0.3);
+    background: repeating-linear-gradient(135deg,rgba(239,68,68,0.04),rgba(239,68,68,0.04) 4px,transparent 4px,transparent 8px);
+  }
+
+  .slot-time { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text2); font-weight: 500; }
+  .slot-entries { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+
+  .entry {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2px 6px; border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+  }
+  .entry-mine { background: rgba(240,192,64,0.15); color: var(--accent); border: 1px solid rgba(240,192,64,0.25); }
+  .entry-other { background: var(--surface2); color: var(--text2); border: 1px solid transparent; }
+  .entry-validated { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
+  .entry-refused { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); text-decoration: line-through; }
+  .entry-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.7rem; padding: 0; opacity: 0.7; }
+  .entry-del:hover { opacity: 1; }
+
+  .slot-blocked-label {
+    display: flex; align-items: center; justify-content: center; flex: 1;
+    color: var(--danger); font-size: 0.65rem; font-family: 'DM Mono', monospace; opacity: 0.7;
+  }
+
+  .slot-footer { margin-top: auto; }
+  .btn-reserve {
+    width: 100%; padding: 0.25rem; background: transparent;
+    border: 1px dashed var(--border); color: var(--muted);
+    border-radius: 5px; cursor: pointer; font-size: 0.65rem;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .btn-reserve:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.05); }
+  .btn-reserve:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-reserve.inscrit { border-color: rgba(240,192,64,0.3); color: var(--accent); opacity: 0.7; cursor: default; }
+
+  .separator { height: 1px; background: var(--border); margin: 0.5rem 0 1.5rem; }
+
+  /* STATUS */
+  #status-msg {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1.25rem;
+    font-size: 0.875rem; display: none; z-index: 999; max-width: 300px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  #status-msg.show { display: block; animation: slidein 0.2s ease; }
+  #status-msg.ok { border-color: var(--success); color: var(--success); }
+  #status-msg.err { border-color: var(--danger); color: var(--danger); }
+  @keyframes slidein { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Circuit CTS</h1>
+    <p class="subtitle">Réservation des créneaux</p>
+    <div class="info-box">
+      Plages disponibles : <strong>vendredi</strong>, <strong>samedi</strong>
+      et <strong>lundi matin jusqu'à 10h</strong>.<br>
+      Maximum <strong>3 groupes</strong> par créneau de 20 min.<br>
+      Votre réservation doit être validée par un prof.
+    </div>
+    <label>Numéro de groupe</label>
+    <select id="group-select">
+      <option value="">-- Choisir --</option>
+      <option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option>
+      <option>9</option><option>10</option>
+    </select>
+    <button class="btn-primary" onclick="loginStudent()">Accéder au planning</button>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <h1>&#9654; Circuit CTS</h1>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span id="user-badge"></span>
+      <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--text2)">
+        <div class="dot"></div> Live
+      </div>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:rgba(240,192,64,0.4);border:1px solid rgba(240,192,64,0.6)"></div>Mon groupe
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:rgba(34,197,94,0.3);border:1px solid rgba(34,197,94,0.5)"></div>Validé
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:rgba(239,68,68,0.15);border:1px dashed rgba(239,68,68,0.5)"></div>Refusé / Bloqué
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--surface2);border:1px solid var(--border)"></div>Autre groupe
+    </div>
+  </div>
+  <div class="container" id="grid-container"></div>
+</div>
+
+<div id="status-msg"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, onValue, push, remove }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+// ==== REMPLACE CES VALEURS PAR TA CONFIG FIREBASE ====
+const firebaseConfig = {
+  apiKey: "AIzaSyDoyOMkdmcXdMY65fUwgBCcuTmMHhXb1_0",
+  authDomain: "gdpcts.firebaseapp.com",
+  databaseURL: "https://gdpcts-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "gdpcts",
+  storageBucket: "gdpcts.firebasestorage.app",
+  messagingSenderId: "599990973235",
+  appId: "1:599990973235:web:16467be830daa86c958446"
+};
+// =====================================================
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Plages 8h00-17h00 par pas de 20 min
+const ALL_SLOTS = [];
+for (let h = 8; h < 17; h++)
+  for (let m = 0; m < 60; m += 20)
+    ALL_SLOTS.push(`${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`);
+
+const DAYS = [
+  { id: 'vendredi', label: 'Vendredi', slots: ALL_SLOTS, limit: null },
+  { id: 'samedi',   label: 'Samedi',   slots: ALL_SLOTS, limit: null },
+  { id: 'lundi',    label: 'Lundi',    slots: ALL_SLOTS.filter(s => {
+    const h = parseInt(s);
+    return h < 10;
+  }), limit: '08h00 - 10h00' }
+];
+
+let currentGroup = null;
+let reservations = {};
+
+window.loginStudent = () => {
+  const g = document.getElementById('group-select').value;
+  if (!g) { showMsg('Choisissez un numéro de groupe', 'err'); return; }
+  currentGroup = g;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-badge').innerHTML =
+    `<span class="badge">Groupe ${g}</span>`;
+  onValue(ref(db, 'reservations'), snap => {
+    reservations = snap.val() || {};
+    renderGrid();
+  });
+};
+
+window.logout = () => {
+  currentGroup = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+};
+
+function renderGrid() {
+  const container = document.getElementById('grid-container');
+  container.innerHTML = '';
+  DAYS.forEach(day => {
+    const section = document.createElement('div');
+    section.className = 'day-section';
+    section.innerHTML = `<div class="day-header">
+      <div class="day-title">${day.label}</div>
+      ${day.limit ? `<span class="day-limit">${day.limit}</span>` : ''}
+    </div>`;
+    const grid = document.createElement('div');
+    grid.className = 'slots-grid';
+
+    day.slots.forEach(slotTime => {
+      const slotId = `${day.id}_${slotTime.replace('h','')}`;
+      const slotData = reservations[slotId] || {};
+      const entries = Object.entries(slotData);
+      const blocked = entries.find(([,v]) => v.type === 'blocked');
+      const groups = entries.filter(([,v]) => v.type !== 'blocked');
+      const isFull = groups.length >= 3;
+      const hasMine = groups.some(([,v]) => v.group === currentGroup);
+      const myEntry = groups.find(([,v]) => v.group === currentGroup);
+
+      const slot = document.createElement('div');
+      slot.className = 'slot' +
+        (blocked ? ' blocked' : isFull ? ' full' : '') +
+        (hasMine ? ' has-mine' : '');
+
+      let html = `<div class="slot-time">${slotTime}</div><div class="slot-entries">`;
+
+      if (blocked) {
+        html += `<div class="slot-blocked-label">&#9888; Indisponible</div>`;
+      } else {
+        groups.forEach(([key, val]) => {
+          const isMine = val.group === currentGroup;
+          const cls = val.status === 'validated' ? 'entry-validated'
+            : val.status === 'refused' ? 'entry-refused'
+            : isMine ? 'entry-mine' : 'entry-other';
+          const icon = val.status === 'validated' ? ' ✓' : val.status === 'refused' ? ' ✗' : '';
+          html += `<div class="entry ${cls}">
+            <span>Gr. ${val.group}${icon}</span>
+            ${isMine && val.status !== 'validated'
+              ? `<button class="entry-del" onclick="cancelReservation('${slotId}','${key}')">✕</button>`
+              : ''}
+          </div>`;
+        });
+      }
+
+      html += `</div><div class="slot-footer">`;
+      if (!blocked) {
+        if (hasMine) {
+          html += `<button class="btn-reserve inscrit" disabled>Inscrit ✓</button>`;
+        } else if (isFull) {
+          html += `<button class="btn-reserve" disabled>Complet</button>`;
+        } else {
+          html += `<button class="btn-reserve" onclick="addReservation('${slotId}')">+ Réserver</button>`;
+        }
+      }
+      html += `</div>`;
+      slot.innerHTML = html;
+      grid.appendChild(slot);
+    });
+
+    section.appendChild(grid);
+    const sep = document.createElement('div');
+    sep.className = 'separator';
+    section.appendChild(sep);
+    container.appendChild(section);
+  });
+}
+
+window.addReservation = slotId => {
+  const slotData = reservations[slotId] || {};
+  const groups = Object.values(slotData).filter(v => v.type !== 'blocked');
+  if (groups.length >= 3) { showMsg('Créneau complet !', 'err'); return; }
+  if (groups.some(v => v.group === currentGroup)) { showMsg('Déjà inscrit ici', 'err'); return; }
+  push(ref(db, `reservations/${slotId}`), {
+    group: currentGroup, type: 'reservation', status: 'pending', ts: Date.now()
+  }).then(() => showMsg('Réservation enregistrée !', 'ok'));
+};
+
+window.cancelReservation = (slotId, key) => {
+  remove(ref(db, `reservations/${slotId}/${key}`))
+    .then(() => showMsg('Réservation annulée', 'ok'));
+};
+
+let msgTimer;
+function showMsg(txt, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = txt;
+  el.className = `show ${type}`;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+</script>
+</body>
+</html>
